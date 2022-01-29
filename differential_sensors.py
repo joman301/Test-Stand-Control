@@ -10,6 +10,10 @@ from ADCDifferentialPi import ADCDifferentialPi
 I2C_ADDR_ONE = 0x68
 I2C_ADDR_TWO = 0x6b
 
+#Calibrate Voltages
+CALIBRATE_CH1 = 0.0006875
+CALIBRATE_CH2 = 0.000297 +0.000172
+
 # Bitrate can be 12, 14, 16, or 18
 BITRATE = 18
 
@@ -27,10 +31,10 @@ def main():
         os.system('clear')
 
         #Read data from i2c lanes
-        CH1_VOLTAGE = adc.read_voltage(1)
+        CH1_VOLTAGE = adc.read_voltage(1) + CALIBRATE_CH2
         print("Channel 1: %02f V" % CH1_VOLTAGE)
 
-        CH1_PRESSURE = 100000*CH1_VOLTAGE
+        CH1_PRESSURE = 1.007*10000*CH1_VOLTAGE
         print("Pressure: %02f psi" % CH1_PRESSURE)
 
         #Save data to the csv file
