@@ -3,6 +3,7 @@
 import zmq
 import time
 import threading
+import commands as cmd
 
 context = zmq.Context()
 socket = context.socket(zmq.REP)
@@ -14,26 +15,16 @@ def wait():
 
 def main():
 
-    for i in range(10):
-        x = threading.Thread(name='wait', target = wait)
-        x.start()
-    
-    while(True):
-        for thread in threading.enumerate():
-            print(thread.name)
-        time.sleep(1)
-
-
-    '''
-
-
     while(True):
         cmd_string = socket.recv()
-
         print("received command: ", cmd_string)
+        user_command = cmd.parse(cmd_string)       
+
+        x = threading.Thread(name='command', target=cmd.exe, args=[user_command])
+        x.start()
 
         socket.send(b"running command")
-        '''
+        
     
 
 if __name__ == "__main__":
