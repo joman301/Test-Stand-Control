@@ -22,6 +22,7 @@ class Dev(Enum):
     LOX_MOTOR = 1
     KER_MOTOR = 2
 
+#Rotates specified motor by specified number of steps
 def rotate(motor, step_count):
     global LOX_MOTOR_POS_DEG, KER_MOTOR_POS_DEG
 
@@ -97,6 +98,7 @@ def help():
     '''
     print(s)
 
+# Repeats the previous command
 def rr():
     if len(LAST_COMMAND) > 0:
         exe(LAST_COMMAND)
@@ -123,6 +125,7 @@ commands = {
     "rr": [rr, 1]
 }
 
+# Takes an array including command and arguments, and executes it
 def exe(user_command):
     global LAST_COMMAND 
 
@@ -147,6 +150,7 @@ def exe(user_command):
     except:
         return 1
 
+# Converts a string to an array of arguments
 def parse(user_input):
     user_input = str.lower(user_input)
     user_command = user_input.split()

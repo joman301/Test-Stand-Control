@@ -6,7 +6,7 @@ ADC_ADDR_ONE = 0x68
 ADC_ADDR_TWO = 0x6b
 ADC_BITRATE = 18
 
-#adc = ADCDifferentialPi(ADC_ADDR_ONE, ADC_ADDR_TWO, ADC_BITRATE)
+adc = ADCDifferentialPi(ADC_ADDR_ONE, ADC_ADDR_TWO, ADC_BITRATE)
 
 class Data(Enum):
     LOX_PSI = 1
@@ -47,7 +47,3 @@ def calibrate(data):
     convert = conv_linear.get(data)
     conv_linear[data] = [convert[0] - current_value, convert[1]]           
 
-print(read(Data.LOX_PSI))
-print(read(Data.KER_PSI))
-calibrate(Data.KER_PSI)
-print(read(Data.KER_PSI))
