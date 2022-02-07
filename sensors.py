@@ -31,14 +31,11 @@ def read_voltage(data):
     '''Returns the raw voltage value from the sensor'''
     match data:    
         case Data.LOX_PSI:
-            #return adc.read_voltage(2)
-            return 0.2
+            return adc.read_voltage(2)
         case Data.KER_PSI:
-            #return adc.read_voltage(3)
-            return 0.4
+            return adc.read_voltage(3)
         case Data.PRES_PSI:
-            #return adc.read_voltage(4)
-            return 0.6
+            return adc.read_voltage(4)
 
 def calibrate(data):
     '''sets current value from sensor as 0'''

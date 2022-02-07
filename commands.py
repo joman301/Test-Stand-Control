@@ -1,4 +1,5 @@
 from enum import Enum
+import message as msg
 import time
 import board
 from adafruit_motor import stepper
@@ -26,23 +27,32 @@ class Dev(Enum):
 def rotate(motor, step_count):
     global LOX_MOTOR_POS_DEG, KER_MOTOR_POS_DEG
 
+    if(step_count >= 50):
+        user_message = "Type \'yes\' to confirm %s steps on device %s" % (step_count, Dev(motor).name)
+        if msg.request(user_message) != 'yes':
+            return 4
+    msg.command_request()
+
+    deg_per_step = 1.8
+
     if step_count > 0:
         dir = stepper.FORWARD
     else:
         dir = stepper.BACKWARD
         step_count = step_count * -1
+        deg_per_step = deg_per_step *-1
     
     if motor == Dev.LOX_MOTOR:
         for i in range(step_count):
             motors.stepper1.onestep(direction = dir, style=stepper.SINGLE)
-            LOX_MOTOR_POS_DEG += 1.8
+            LOX_MOTOR_POS_DEG += deg_per_step
             time.sleep(0.01)
         motors.stepper1.release()
 
     elif motor == Dev.KER_MOTOR:
         for i in range(step_count):
             motors.stepper2.onestep(direction = dir, style=stepper.SINGLE)
-            KER_MOTOR_POS_DEG += 1.8
+            KER_MOTOR_POS_DEG += deg_per_step
             time.sleep(0.01)
         motors.stepper2.release()
 
@@ -92,11 +102,15 @@ def help():
     ker_inc [n]: runs n steps forward on kerosene
     ker_dec [n]: runs n steps backward on kerosene
 
+    lox_motor_pos: return angular offset of lox motor
+    ker_motor_pos: return angular offset of ker motor
+
     help: print help menu
     quit: leave program
     rr: repeat last command
     '''
     print(s)
+    msg.command_request()
 
 # Repeats the previous command
 def rr():
@@ -137,17 +151,20 @@ def exe(user_command):
 
 
     if (user_method in commands.keys()) == False:
+        msg.command_request(("Error: command \"%s\" not found\n> > > ") % user_command )
         return 2
     
     method = commands.get(user_method)[0]
     num_args = commands.get(user_method)[1]
 
     if len(user_command) != num_args:
+        msg.command_request(("Error: %s arguments were given when %s was expected\n> > > ") % (len(user_command), num_args))
         return 3
 
     try:
         return method(*user_args)
     except:
+        msg.command_request("An error has occured\n> > >")
         return 1
 
 # Converts a string to an array of arguments
@@ -160,3 +177,4 @@ def parse(user_input):
             user_command[i] = int(item)
 
     return user_command
+
