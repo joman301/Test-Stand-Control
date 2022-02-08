@@ -1,9 +1,9 @@
 from enum import Enum
 import message as msg
 import time
-import board
-from adafruit_motor import stepper
-from adafruit_motorkit import MotorKit
+#import board
+#from adafruit_motor import stepper
+#from adafruit_motorkit import MotorKit
 
 LAST_COMMAND = []
 LOX_MOTOR_POS_DEG = 0
@@ -17,7 +17,7 @@ KER_MOTOR_POS_DEG = 0
 # stepper.FORWARD = clockwise, increase presssure
 # stepper.BACKWARD = counterclockwise, decrease pressure
 
-motors = MotorKit(i2c=board.I2C())
+#motors = MotorKit(i2c=board.I2C())
 
 class Dev(Enum):
     LOX_MOTOR = 1
@@ -29,12 +29,13 @@ def rotate(motor, step_count):
 
     if(step_count >= 50):
         user_message = "Type \'yes\' to confirm %s steps on device %s" % (step_count, Dev(motor).name)
-        if msg.request(user_message) != 'yes':
+        if msg.string_request(user_message) != 'yes':
+            msg.command_request("Operation Cancelled")
             return 4
-    msg.command_request()
+    msg.command_request(("Rotating %s Motor %s steps") % (Dev(motor).name, step_count))
 
     deg_per_step = 1.8
-
+'''
     if step_count > 0:
         dir = stepper.FORWARD
     else:
@@ -55,16 +56,17 @@ def rotate(motor, step_count):
             KER_MOTOR_POS_DEG += deg_per_step
             time.sleep(0.01)
         motors.stepper2.release()
+'''
 
 def rotate_deg(stepper, deg):
     steps = deg//1.8
     rotate(stepper, steps)
 
 def lox_motor_pos():
-    return LOX_MOTOR_POS_DEG
+    msg.command_request("LOX Motor rotated %s degrees" % LOX_MOTOR_POS_DEG)
 
 def ker_motor_pos():
-    return KER_MOTOR_POS_DEG
+    msg.command_request("KEROSENE Motor rotated %s degrees" % KER_MOTOR_POS_DEG)
 
 def lox_is():
     rotate(Dev.LOX_MOTOR,10)
@@ -105,12 +107,12 @@ def help():
     lox_motor_pos: return angular offset of lox motor
     ker_motor_pos: return angular offset of ker motor
 
+    ping: test connection
     help: print help menu
     quit: leave program
     rr: repeat last command
     '''
-    print(s)
-    msg.command_request()
+    msg.command_request(s)
 
 # Repeats the previous command
 def rr():
@@ -118,6 +120,9 @@ def rr():
         exe(LAST_COMMAND)
     else:
         return 1
+
+def ping():
+    msg.command_request("pong")
 
 #dictionary of all commands, and number of args
 commands = {
@@ -131,9 +136,10 @@ commands = {
     "ker_inc": [ker_inc, 2],
     "ker_dec": [ker_dec, 2],
 
-    "lox_motor_pos": [ker_motor_pos, 1],
+    "lox_motor_pos": [lox_motor_pos, 1],
     "ker_motor_pos": [ker_motor_pos, 1],
 
+    "ping": [ping, 1],
     "help": [help, 1],
     "quit": [quit, 1],
     "rr": [rr, 1]
@@ -151,20 +157,20 @@ def exe(user_command):
 
 
     if (user_method in commands.keys()) == False:
-        msg.command_request(("Error: command \"%s\" not found\n> > > ") % user_command )
+        msg.command_request(("Error: command \"%s\" not found") % user_command )
         return 2
     
     method = commands.get(user_method)[0]
     num_args = commands.get(user_method)[1]
 
     if len(user_command) != num_args:
-        msg.command_request(("Error: %s arguments were given when %s was expected\n> > > ") % (len(user_command), num_args))
+        msg.command_request(("Error: %s arguments were given when %s was expected") % (len(user_command), num_args))
         return 3
 
     try:
         return method(*user_args)
     except:
-        msg.command_request("An error has occured\n> > >")
+        msg.command_request("An error has occured")
         return 1
 
 # Converts a string to an array of arguments

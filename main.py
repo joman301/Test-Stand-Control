@@ -19,15 +19,13 @@ def main():
 
     while(True):
         # Receive command from host
-
         user_message = msg.get()
-        str(user_message, 'UTF-8')
+        user_message = str(user_message, 'UTF-8')
         a = user_message.find('%')
 
         if user_message[:a] == 'cmd':
 
             cmd_string = user_message[a+1:]
-            cmd_string = str(cmd_string, 'UTF-8')
             user_command = cmd.parse(cmd_string)       
 
             # Create new thread and run command

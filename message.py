@@ -4,8 +4,10 @@ import zmq
 import time
 
 context = zmq.Context()
-socket = context.socket(zmq.REP)
-socket.bind("tcp://*:5555")
+send_socket = context.socket(zmq.PAIR)
+send_socket.bind("tcp://*:5555")
+receive_socket = context.socket(zmq.PAIR)
+receive_socket.bind("tcp://*:5556")
 
 # Queue of all data either received or to be sent
 SEND_INFO = queue.Queue()
@@ -14,20 +16,20 @@ RECEIVED_INFO = queue.Queue()
 # Queue of all data which is a reply to a request
 RECEIVED_REPLIES = queue.Queue(1)
 
-
 def sender():
     '''Immediately sends any info in the
     SEND_INFO queue over the socket'''
     global SEND_INFO
     while(True):
-        socket.send_string(SEND_INFO.get())
+        send_socket.send_string(SEND_INFO.get())
+
 
 def receiver():
     '''Puts any received info from the socket
     in the RECEIVED_INFO queue'''
     global RECEIVED_INFO
     while(True):
-        RECEIVED_INFO.put(socket.recv())
+        RECEIVED_INFO.put(receive_socket.recv())
 
 def receive_reply(message):
     '''adds a reply to the RECEIVED_REPLIES queue'''
@@ -50,7 +52,7 @@ def send(message):
     SEND_INFO.put(message)
     
 
-CAN_REQUEST = threading.Event
+CAN_REQUEST = threading.Event()
 CAN_REQUEST.set()
 
 def string_request(message):
@@ -67,13 +69,14 @@ def string_request(message):
     CAN_REQUEST.set()
     return a
 
-def command_request(message = "> > > "):
+def command_request(message = ""):
     '''request a command from the host, and blocks other threads from getting
     input from the user. Received command is immediately executed in main loop'''
     global CAN_REQUEST
     CAN_REQUEST.wait()
     CAN_REQUEST.clear()
     
-    message = 'cmd%' + message
+    message = 'cmd%' + message + "\n> > >"
     SEND_INFO.put(message)
+    CAN_REQUEST.set()
 
