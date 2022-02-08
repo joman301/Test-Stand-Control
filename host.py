@@ -1,3 +1,5 @@
+'''Host computer, which receives/sends
+commands to the server'''
 import zmq
 
 context = zmq.Context()
@@ -10,12 +12,14 @@ send_socket.connect("tcp://10.0.0.1:5556")
 
 
 while(True):
-
-        #cmd_string = input("--->")
-        #cmd_string = 'cmd%' + cmd_string
-        #socket.send_string("test")
         message = receive_socket.recv()
         message = str(message, 'UTF-8')
+
+        '''Message types:
+        cmr - Request for a command from server
+        req - Request for string input from server
+        cmd - Command with arguments, which can be executed on server
+        rep - Reply to a request for string input'''
 
         a = message.find('%')
         if message[:a] == "cmr":

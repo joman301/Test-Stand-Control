@@ -1,3 +1,5 @@
+'''List of methods which can read data from
+various sensors on the assembly'''
 from enum import Enum
 from ADCDifferentialPi import ADCDifferentialPi
 

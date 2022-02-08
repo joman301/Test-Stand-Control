@@ -1,3 +1,6 @@
+'''Responsible for managing all incoming and outgoing
+data between host and server, and ensures multiple
+threads have access to such functionality'''
 import queue
 import threading
 import zmq
@@ -21,7 +24,6 @@ def sender():
     global SEND_INFO
     while(True):
         send_socket.send_string(SEND_INFO.get())
-
 
 def receiver():
     '''Puts any received info from the socket
@@ -50,7 +52,8 @@ def send(message):
     queue'''
     SEND_INFO.put(message)
     
-
+# Global entity which determines whether
+# requests can be made by the server
 CAN_REQUEST = threading.Event()
 CAN_REQUEST.set()
 

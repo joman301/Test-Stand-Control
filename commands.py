@@ -1,3 +1,4 @@
+'''Executes user commands'''
 from enum import Enum
 import message as msg
 import time
