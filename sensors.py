@@ -1,5 +1,6 @@
 '''List of methods which can read data from
 various sensors on the assembly'''
+import datetime
 from enum import Enum
 from ADCDifferentialPi import ADCDifferentialPi
 
@@ -29,14 +30,29 @@ def read(data):
     convert = conv_linear.get(data)
     return convert[0] + voltage*convert[1]
 
+def read_all():
+    '''Collects data from all sensors and stores it as one
+    line of a .csv file'''
+    csv_string = datetime.now().strftime("%H:%M:%S")
+    csv_string = csv_string + ','
+    for item in Data:
+        data_point = read(item)
+        csv_string = csv_string + data_point + ','
+        csv_string = csv_string[:-1] + "\n"
+    return csv_string
+
+
 def read_voltage(data):
     '''Returns the raw voltage value from the sensor'''
     match data:    
         case Data.LOX_PSI:
+            return 3
             return adc.read_voltage(2)
         case Data.KER_PSI:
+            return 5
             return adc.read_voltage(3)
         case Data.PRES_PSI:
+            return 7
             return adc.read_voltage(4)
 
 def calibrate(data):

@@ -1,7 +1,6 @@
 '''Executes user commands'''
 from enum import Enum
 import message as msg
-import time
 #import board
 #from adafruit_motor import stepper
 #from adafruit_motorkit import MotorKit
@@ -108,12 +107,25 @@ def help():
     lox_motor_pos: return angular offset of lox motor
     ker_motor_pos: return angular offset of ker motor
 
+    log_data: start or stop logging sensor data
     ping: test connection
     help: print help menu
     quit: leave program
     rr: repeat last command
     '''
     msg.command_request(s)
+
+# Starts or stops logging data from sensors
+def log_data(currently_logging):
+    if currently_logging.lower() == "true":
+        msg.logging(True)
+        msg.command_request("Started Logging Data")
+    elif currently_logging.lower() == "false":
+        msg.logging(False)
+        msg.command_request("Stopped Logging Data")
+    else:
+        msg.command_request("Error: Invalid Option (Enter \"True\" or \"False\")")
+
 
 # Repeats the previous command
 def rr():
@@ -140,6 +152,7 @@ commands = {
     "lox_motor_pos": [lox_motor_pos, 1],
     "ker_motor_pos": [ker_motor_pos, 1],
 
+    "log_data": [log_data, 2],
     "ping": [ping, 1],
     "help": [help, 1],
     "quit": [quit, 1],

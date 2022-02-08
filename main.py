@@ -11,6 +11,9 @@ def main():
     receiver = threading.Thread(name='receiver', target=msg.receiver)
     receiver.start()
 
+    logger = threading.Thread(name='logger', target=msg.send_data)
+    logger.start()
+    
     # Request an initial command from the user
     msg.command_request()
 

@@ -4,6 +4,7 @@ threads have access to such functionality'''
 import queue
 import threading
 import zmq
+import sensors
 
 context = zmq.Context()
 send_socket = context.socket(zmq.PAIR)
@@ -51,7 +52,30 @@ def send(message):
     '''adds a string to the SEND_INFO
     queue'''
     SEND_INFO.put(message)
-    
+
+# Global entity which determines whether
+# we should send .csv logging data
+LOGGING = threading.Event()
+LOGGING.clear()
+def send_data():
+    '''reads sensor data and sends it to the
+    host over the socket'''
+    global SEND_INFO
+    global LOGGING
+    LOGGING.wait()
+    threading.Timer(0.1, send_data).start()
+    message = 'dat%' + sensors.read_all()
+    SEND_INFO.put(message)
+
+def logging(currently_logging = True):
+    '''determines whether we are currently 
+    logging data or not'''
+    global LOGGING
+    if currently_logging:
+        LOGGING.set()
+    else:
+        LOGGING.clear()
+
 # Global entity which determines whether
 # requests can be made by the server
 CAN_REQUEST = threading.Event()
@@ -61,6 +85,7 @@ def string_request(message):
     '''request input from the host, and blocks other threads from 
     getting input from the user. Receieved string is returned value'''
     global CAN_REQUEST
+    global SEND_INFO
     CAN_REQUEST.wait()
     CAN_REQUEST.clear()
     
@@ -75,6 +100,7 @@ def command_request(message = ""):
     '''request a command from the host, and blocks other threads from getting
     input from the user. Received command is immediately executed in main loop'''
     global CAN_REQUEST
+    global SEND_INFO
     CAN_REQUEST.wait()
     CAN_REQUEST.clear()
     
