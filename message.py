@@ -1,7 +1,6 @@
 import queue
 import threading
 import zmq
-import time
 
 context = zmq.Context()
 send_socket = context.socket(zmq.PAIR)
@@ -76,7 +75,7 @@ def command_request(message = ""):
     CAN_REQUEST.wait()
     CAN_REQUEST.clear()
     
-    message = 'cmd%' + message + "\n> > >"
+    message = 'cmr%' + message + "\n> > > "
     SEND_INFO.put(message)
     CAN_REQUEST.set()
 

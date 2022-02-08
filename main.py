@@ -1,6 +1,3 @@
-#import sensors
-#import commands as cmd
-
 import threading
 import commands as cmd
 import message as msg
