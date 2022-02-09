@@ -1,15 +1,15 @@
 '''List of methods which can read data from
 various sensors on the assembly'''
-import datetime
+from datetime import datetime
 from enum import Enum
-from ADCDifferentialPi import ADCDifferentialPi
+#from ADCDifferentialPi import ADCDifferentialPi
 
 # A/D Differential Sensor
 ADC_ADDR_ONE = 0x68
 ADC_ADDR_TWO = 0x6b
 ADC_BITRATE = 18
 
-adc = ADCDifferentialPi(ADC_ADDR_ONE, ADC_ADDR_TWO, ADC_BITRATE)
+#adc = ADCDifferentialPi(ADC_ADDR_ONE, ADC_ADDR_TWO, ADC_BITRATE)
 
 class Data(Enum):
     LOX_PSI = 1
@@ -33,12 +33,12 @@ def read(data):
 def read_all():
     '''Collects data from all sensors and stores it as one
     line of a .csv file'''
-    csv_string = datetime.now().strftime("%H:%M:%S")
+    csv_string = datetime.now().strftime("%H:%M:%S.%f")[:-3]
     csv_string = csv_string + ','
     for item in Data:
         data_point = read(item)
-        csv_string = csv_string + data_point + ','
-        csv_string = csv_string[:-1] + "\n"
+        csv_string = csv_string + str(data_point) + ','
+    csv_string = csv_string[:-1] + "\n"
     return csv_string
 
 

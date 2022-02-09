@@ -65,6 +65,7 @@ def send_data():
     LOGGING.wait()
     threading.Timer(0.1, send_data).start()
     message = 'dat%' + sensors.read_all()
+    print(message)
     SEND_INFO.put(message)
 
 def logging(currently_logging = True):
