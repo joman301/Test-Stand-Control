@@ -61,6 +61,7 @@ def receive_request(message):
 def get_requests():
         while(True):
                 message = RECEIVED_REQUESTS.get()
+                a = message.find('%')
                 if message[:a] == "cmr":
                         reply = input(message[a+1:])
                         reply = "cmd%" + reply
@@ -72,11 +73,16 @@ def get_requests():
         
 
 requester = threading.Thread(name='requester', target = get_requests)
+requester.start()
+
+sender = threading.Thread(name='sender', target=sender)
+sender.start()
+
+receiver = threading.Thread(name='receiver', target=receiver)
+receiver.start()
         
 
 while(True):
-        message = receive_socket.recv()
-        message = str(message, 'UTF-8')
 
         '''Message types:
         cmr - Request for a command from server
@@ -85,11 +91,14 @@ while(True):
         rep - Reply to a request for string input
         dat - CSV data from the server'''
 
+        message = get()
+        message = str(message, 'UTF-8')
         a = message.find('%')
         if message[:a] == "cmr" or message[:a] == "req":
-                receive_request(message[a+1:])
-        elif message[:a] == "dat%":
+                receive_request(message)
+        elif message[:a] == "dat":
                 with open(file_name, 'a') as file:
+                        print(message[a+1:])
                         file.write(message[a+1:])
                 file.close()
 
