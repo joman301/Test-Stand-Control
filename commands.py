@@ -1,9 +1,10 @@
 '''Executes user commands'''
 from enum import Enum
 import message as msg
-#import board
-#from adafruit_motor import stepper
-#from adafruit_motorkit import MotorKit
+import time
+import board
+from adafruit_motor import stepper
+from adafruit_motorkit import MotorKit
 
 LAST_COMMAND = []
 LOX_MOTOR_POS_DEG = 0
@@ -17,7 +18,7 @@ KER_MOTOR_POS_DEG = 0
 # stepper.FORWARD = clockwise, increase presssure
 # stepper.BACKWARD = counterclockwise, decrease pressure
 
-#motors = MotorKit(i2c=board.I2C())
+motors = MotorKit(i2c=board.I2C())
 
 class Dev(Enum):
     LOX_MOTOR = 1
@@ -35,7 +36,7 @@ def rotate(motor, step_count):
     msg.command_request(("Rotating %s Motor %s steps") % (Dev(motor).name, step_count))
 
     deg_per_step = 1.8
-'''
+
     if step_count > 0:
         dir = stepper.FORWARD
     else:
@@ -56,7 +57,6 @@ def rotate(motor, step_count):
             KER_MOTOR_POS_DEG += deg_per_step
             time.sleep(0.01)
         motors.stepper2.release()
-'''
 
 def rotate_deg(stepper, deg):
     steps = deg//1.8

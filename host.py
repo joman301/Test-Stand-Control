@@ -98,7 +98,6 @@ while(True):
                 receive_request(message)
         elif message[:a] == "dat":
                 with open(file_name, 'a') as file:
-                        print(message[a+1:])
                         file.write(message[a+1:])
                 file.close()
 
