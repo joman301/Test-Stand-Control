@@ -6,6 +6,7 @@ import threading
 import zmq
 import sensors
 from enum import IntEnum
+import time
 
 # ZMQ setup
 context = zmq.Context()
@@ -78,11 +79,12 @@ def send_logs():
     host over the socket'''
     global SEND_INFO
     global LOGGING
-    LOGGING.wait()
-
-    threading.Timer(0.1, send_logs).start()
-    message = 'log%' + sensors.read_all()
-    SEND_INFO.put(message)
+    while(True):
+        LOGGING.wait()
+        #threading.Timer(0.1, send_logs).start()
+        message = 'log%' + sensors.read_all()
+        time.sleep(0.1)
+        SEND_INFO.put(message)
 
 def get_cmd():
     '''waits until user input is allowed, then sets server status
