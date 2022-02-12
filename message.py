@@ -5,7 +5,7 @@ import queue
 import threading
 import zmq
 import sensors
-from enum import Enum
+from enum import IntEnum
 
 # ZMQ setup
 context = zmq.Context()
@@ -26,7 +26,7 @@ DEMAND_REPLIES = queue.Queue(1)
 # Queue of all commands from the host
 RECEIVED_COMMANDS = queue.Queue(1)
 
-class Status(Enum):
+class Status(IntEnum):
     WAITING = 1
     CMD_READY = 2
     DMR_READY = 3
@@ -136,5 +136,5 @@ def logging(currently_logging = True):
 def set_status(status):
     global SEND_INFO, SERVER_STATUS
     SERVER_STATUS = status
-    message = "sta%" + str(status)
+    message = "sta%" + str(int(status))
     SEND_INFO.put(message)

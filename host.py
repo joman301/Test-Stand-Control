@@ -5,7 +5,7 @@ import pandas as pd
 from datetime import datetime
 import queue
 import threading
-from enum import Enum
+from enum import IntEnum
 
 # ZMQ setup
 context = zmq.Context()
@@ -28,7 +28,7 @@ RECEIVED_LOGS = queue.Queue()
 RECEIVED_MESSAGES = queue.Queue()
 
 # Enums for status of server
-class Status(Enum):
+class Status(IntEnum):
     WAITING = 1
     CMD_READY = 2
     DMR_READY = 3
@@ -61,6 +61,7 @@ def receiver():
         elif message[:a] == "msg":
             RECEIVED_MESSAGES.put(message[a+1:])
         elif message[:a] == "sta":
+            print(message[a+1:])
             SERVER_STATUS = int(message[a+1:])
             STATUS_CHANGE.set()
 
