@@ -30,10 +30,10 @@ def rotate(motor, step_count):
 
     if(step_count >= 50):
         user_message = "Type \'yes\' to confirm %s steps on device %s" % (step_count, Dev(motor).name)
-        if msg.string_request(user_message) != 'yes':
-            msg.command_request("Operation Cancelled")
+        if msg.demand(user_message) != 'yes':
+            msg.tell("Operation Cancelled")
             return 4
-    msg.command_request(("Rotating %s Motor %s steps") % (Dev(motor).name, step_count))
+    msg.tell(("Rotating %s Motor %s steps") % (Dev(motor).name, step_count))
 
     deg_per_step = 1.8
 
@@ -63,10 +63,10 @@ def rotate_deg(stepper, deg):
     rotate(stepper, steps)
 
 def lox_motor_pos():
-    msg.command_request("LOX Motor rotated %s degrees" % LOX_MOTOR_POS_DEG)
+    msg.tell("LOX Motor rotated %s degrees" % LOX_MOTOR_POS_DEG)
 
 def ker_motor_pos():
-    msg.command_request("KEROSENE Motor rotated %s degrees" % KER_MOTOR_POS_DEG)
+    msg.tell("KEROSENE Motor rotated %s degrees" % KER_MOTOR_POS_DEG)
 
 def lox_is():
     rotate(Dev.LOX_MOTOR,10)
@@ -113,18 +113,18 @@ def help():
     quit: leave program
     rr: repeat last command
     '''
-    msg.command_request(s)
+    msg.tell(s)
 
 # Starts or stops logging data from sensors
 def log_data(currently_logging):
     if currently_logging.lower() == "true":
         msg.logging(True)
-        msg.command_request("Started Logging Data")
+        msg.tell("Started Logging Data")
     elif currently_logging.lower() == "false":
         msg.logging(False)
-        msg.command_request("Stopped Logging Data")
+        msg.tell("Stopped Logging Data")
     else:
-        msg.command_request("Error: Invalid Option (Enter \"True\" or \"False\")")
+        msg.tell("Error: Invalid Option (Enter \"True\" or \"False\")")
 
 
 # Repeats the previous command
@@ -135,7 +135,7 @@ def rr():
         return 1
 
 def ping():
-    msg.command_request("pong")
+    msg.tell("pong")
 
 #dictionary of all commands, and number of args
 commands = {
@@ -171,20 +171,20 @@ def exe(user_command):
 
 
     if (user_method in commands.keys()) == False:
-        msg.command_request(("Error: command \"%s\" not found") % user_command )
+        msg.tell(("Error: command \"%s\" not found") % user_command )
         return 2
     
     method = commands.get(user_method)[0]
     num_args = commands.get(user_method)[1]
 
     if len(user_command) != num_args:
-        msg.command_request(("Error: %s arguments were given when %s was expected") % (len(user_command), num_args))
+        msg.tell(("Error: %s arguments were given when %s was expected") % (len(user_command), num_args))
         return 3
 
     try:
         return method(*user_args)
     except:
-        msg.command_request("An error has occured")
+        msg.tell("An error has occured")
         return 1
 
 # Converts a string to an array of arguments
