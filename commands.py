@@ -28,12 +28,13 @@ class Dev(Enum):
 def rotate(motor, step_count):
     global LOX_MOTOR_POS_DEG, KER_MOTOR_POS_DEG
 
-    if(step_count >= 50):
+    if(abs(step_count) >= 50):
         user_message = "Type \'yes\' to confirm %s steps on device %s" % (step_count, Dev(motor).name)
         if msg.demand(user_message) != 'yes':
             msg.tell("Operation Cancelled")
             return 4
     msg.tell(("Rotating %s Motor %s steps") % (Dev(motor).name, step_count))
+    msg.set_status(msg.Status.CMD_READY)
 
     deg_per_step = 1.8
 
@@ -172,19 +173,24 @@ def exe(user_command):
 
     if (user_method in commands.keys()) == False:
         msg.tell(("Error: command \"%s\" not found") % user_command )
+        msg.set_status(msg.Status.CMD_READY)
         return 2
     
     method = commands.get(user_method)[0]
     num_args = commands.get(user_method)[1]
 
     if len(user_command) != num_args:
-        msg.tell(("Error: %s arguments were given when %s was expected") % (len(user_command), num_args))
+        msg.tell(("Error: %s arguments were given when %s were expected") % (len(user_command), num_args))
+        msg.set_status(msg.Status.CMD_READY)
         return 3
 
     try:
-        return method(*user_args)
+        a = method(*user_args)
+        msg.set_status(msg.Status.CMD_READY)
+        return a
     except:
         msg.tell("An error has occured")
+        msg.set_status(msg.Status.CMD_READY)
         return 1
 
 # Converts a string to an array of arguments

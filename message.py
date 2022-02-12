@@ -33,7 +33,7 @@ class Status(IntEnum):
 
 # Current status of server (used by host to test 
 # connection and determine when to send messages)
-SERVER_STATUS = Status.CMD_READY
+SERVER_STATUS = Status.WAITING
 
 # Global entity which determines whether
 # to send .csv logging data

@@ -61,9 +61,10 @@ def receiver():
         elif message[:a] == "msg":
             RECEIVED_MESSAGES.put(message[a+1:])
         elif message[:a] == "sta":
-            print(message[a+1:])
-            SERVER_STATUS = int(message[a+1:])
-            STATUS_CHANGE.set()
+            a = int(message[a+1:])
+            if SERVER_STATUS != a:
+                SERVER_STATUS = a
+                STATUS_CHANGE.set()
 
 def logger():
     '''Thread which stores all data in the RECEIVED_LOGS
