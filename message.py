@@ -9,9 +9,9 @@ from enum import IntEnum
 
 # ZMQ setup
 context = zmq.Context()
-send_socket = context.socket(zmq.PAIR)
+send_socket = context.socket(zmq.PUSH)
 send_socket.bind("tcp://*:5555")
-receive_socket = context.socket(zmq.PAIR)
+receive_socket = context.socket(zmq.PULL)
 receive_socket.bind("tcp://*:5556")
 
 # Queue of all data that will later be sent to the host

@@ -9,9 +9,9 @@ from enum import IntEnum
 
 # ZMQ setup
 context = zmq.Context()
-receive_socket = context.socket(zmq.PAIR)
+receive_socket = context.socket(zmq.PULL)
 receive_socket.connect("tcp://10.0.0.1:5555")
-send_socket = context.socket(zmq.PAIR)
+send_socket = context.socket(zmq.PUSH)
 send_socket.connect("tcp://10.0.0.1:5556")
 
 current_date = datetime.now().strftime("%d-%m-%Y %H:%M:%S")
