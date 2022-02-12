@@ -103,8 +103,9 @@ def user_io():
 def user_messages():
     '''Thread which prints all received messages to the console'''
     global RECEIVED_MESSAGES
-    message = RECEIVED_MESSAGES.get()
-    print(message)
+    while(True):
+        message = RECEIVED_MESSAGES.get()
+        print(message)
 
 
 send = threading.Thread(name='sender', target=sender)
