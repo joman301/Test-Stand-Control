@@ -34,7 +34,7 @@ def rotate(motor, step_count):
             msg.tell("Operation Cancelled")
             return 4
     msg.tell(("Rotating %s Motor %s steps") % (Dev(motor).name, step_count))
-    msg.set_status(msg.Status.CMD_READY)
+    msg.cmd_ready()
 
     deg_per_step = 1.8
 
@@ -173,7 +173,7 @@ def exe(user_command):
 
     if (user_method in commands.keys()) == False:
         msg.tell(("Error: command \"%s\" not found") % user_command )
-        msg.set_status(msg.Status.CMD_READY)
+        msg.cmd_ready()
         return 2
     
     method = commands.get(user_method)[0]
@@ -181,16 +181,16 @@ def exe(user_command):
 
     if len(user_command) != num_args:
         msg.tell(("Error: %s arguments were given when %s were expected") % (len(user_command), num_args))
-        msg.set_status(msg.Status.CMD_READY)
+        msg.cmd_ready()
         return 3
 
     try:
         a = method(*user_args)
-        msg.set_status(msg.Status.CMD_READY)
+        msg.cmd_ready()
         return a
     except:
         msg.tell("An error has occured")
-        msg.set_status(msg.Status.CMD_READY)
+        msg.cmd_ready()
         return 1
 
 # Converts a string to an array of arguments

@@ -138,3 +138,7 @@ def set_status(status):
     SERVER_STATUS = status
     message = "sta%" + str(int(status))
     SEND_INFO.put(message)
+
+def cmd_ready():
+    set_status(Status.CMD_READY)
+    CAN_GET_USER_INPUT.set()
