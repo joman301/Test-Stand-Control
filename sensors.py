@@ -25,9 +25,9 @@ class Data(Enum):
 #Calibration for a + bx voltage/data translation
 #First value is y-int, second is slope
 conv_linear = {
-    Data.LOX_PSI: [0, 100000],
-    Data.KER_PSI: [0, 100000],
-    Data.PRES_PSI: [0, 100000]
+    Data.LOX_PSI: [0.0006875, 100700],
+    Data.KER_PSI: [0.0006875, 100700],
+    Data.PRES_PSI: [0.0006875, 100700]
 }
 
 def read(data):
