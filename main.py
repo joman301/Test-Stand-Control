@@ -1,16 +1,29 @@
+'''Responsible for managing all threads generated in the
+program'''
+
 import threading
+
 import commands as cmd
 import message as msg
 
+__author__ = "Aidan Cantu"
 
 def execute():
     '''Thread which executes all commands'''
-    
     while(True):
         user_command = msg.get_cmd()
         user_command = cmd.parse(user_command)
-        x = threading.Thread(name='command', target=cmd.exe, args = [user_command])
-        x.start()
+        if user_command[1].lower() == "stop":
+            msg.stop()
+            for x in threading.enumerate():
+                if x.getName()=="command":
+                    x.join()
+            msg.tell("all commands exited")
+            msg.resume()
+            msg.cmd_ready()
+        else:
+            x = threading.Thread(name='command', target=cmd.exe, args = [user_command])
+            x.start()
 
 def main():
 

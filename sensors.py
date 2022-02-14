@@ -1,15 +1,21 @@
 '''List of methods which can read data from
 various sensors on the assembly'''
+
 from datetime import datetime
 from enum import Enum
+
 from ADCDifferentialPi import ADCDifferentialPi
+
+__author__ = "Aidan Cantu"
 
 # A/D Differential Sensor
 ADC_ADDR_ONE = 0x68
 ADC_ADDR_TWO = 0x6b
-ADC_BITRATE = 18
+ADC_BITRATE = 14
+ADC_GAIN = 8
 
 adc = ADCDifferentialPi(ADC_ADDR_ONE, ADC_ADDR_TWO, ADC_BITRATE)
+adc.set_pga(8)
 
 class Data(Enum):
     LOX_PSI = 1
@@ -26,23 +32,23 @@ conv_linear = {
 
 def read(data):
     '''Returns the specified data from the sensor'''
-    voltage = read_voltage(data)
+    voltage = read_voltage(data)/ADC_GAIN
     convert = conv_linear.get(data)
     return convert[0] + voltage*convert[1]
 
 def read_all():
     '''Collects data from all sensors and stores it as one
     line of a .csv file'''
-    print("start: ", datetime.now())
+    # print("start: ", datetime.now())
     csv_string = datetime.now().strftime("%H:%M:%S.%f")[:-3]
     csv_string = csv_string + ','
-    print("begin loop: ", datetime.now())
+    # print("begin loop: ", datetime.now())
     for item in Data:
         data_point = read(item)
         csv_string = csv_string + str(data_point) + ','
-        print("   loop: ", datetime.now())
+        # print("   loop: ", datetime.now())
     csv_string = csv_string[:-1] + "\n"
-    print("end loop ", datetime.now())
+    # print("end loop ", datetime.now())
     return csv_string
 
 

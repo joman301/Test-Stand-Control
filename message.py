@@ -1,12 +1,17 @@
 '''Responsible for managing all incoming and outgoing
 data between host and server, and ensures multiple
 threads have access to such functionality'''
+
 import queue
 import threading
-import zmq
-import sensors
 from enum import IntEnum
 import time
+
+import zmq
+
+import sensors
+
+__author__ = "Aidan Cantu"
 
 # ZMQ setup
 context = zmq.Context()
@@ -43,8 +48,11 @@ LOGGING.clear()
 
 # Global entity which determines whether
 # requests can be made by the server
-CAN_GET_USER_INPUT = threading.Event()
-CAN_GET_USER_INPUT.set()
+USER_IO_AVAILABLE = threading.Event()
+USER_IO_AVAILABLE.set()
+
+# Global variable which will stop all running commands
+STOPPED = False
 
 def sender():
     '''Immediately sends any info in the
@@ -72,6 +80,7 @@ def tell(message = ""):
     '''Sends a string message to the host'''
     global SEND_INFO
     message = "msg%" + message
+    USER_IO_AVAILABLE.wait()
     SEND_INFO.put(message)
 
 def send_logs():
@@ -83,15 +92,15 @@ def send_logs():
         LOGGING.wait()
         #threading.Timer(0.1, send_logs).start()
         message = 'log%' + sensors.read_all()
-        time.sleep(0.1)
+        time.sleep(0.05)
         SEND_INFO.put(message)
 
 def get_cmd():
     '''waits until user input is allowed, then sets server status
     to enable commands, then returns received command'''
-    global RECEIVED_COMMANDS, CAN_GET_USER_INPUT, SERVER_STATUS
+    global RECEIVED_COMMANDS, USER_IO_AVAILABLE, SERVER_STATUS
 
-    CAN_GET_USER_INPUT.wait()
+    USER_IO_AVAILABLE.wait()
     set_status(Status.CMD_READY)
 
     a = RECEIVED_COMMANDS.get()
@@ -108,22 +117,22 @@ def get_dmd():
         message = str(SERVER_STATUS)
     SEND_INFO.put(message)
         
-
 def demand(message):
     '''Waits until user input is allowed, then sets server status
     to enable demand replies, then returns received demand reply'''
-    global CAN_GET_USER_INPUT
+    global USER_IO_AVAILABLE
     global SERVER_STATUS
 
-    CAN_GET_USER_INPUT.wait()
-    CAN_GET_USER_INPUT.clear()
+    USER_IO_AVAILABLE.wait()
 
     tell(message)
+
+    USER_IO_AVAILABLE.clear()
 
     set_status(Status.DMR_READY)
     a = DEMAND_REPLIES.get()
     set_status(Status.WAITING)
-    CAN_GET_USER_INPUT.set()
+    USER_IO_AVAILABLE.set()
     return a
 
 def logging(currently_logging = True):
@@ -143,4 +152,16 @@ def set_status(status):
 
 def cmd_ready():
     set_status(Status.CMD_READY)
-    CAN_GET_USER_INPUT.set()
+    USER_IO_AVAILABLE.set()
+
+def stop():
+    global STOPPED
+    STOPPED = True
+
+def is_stopped():
+    global STOPPED
+    return STOPPED
+
+def resume():
+    global STOPPED
+    STOPPED = True

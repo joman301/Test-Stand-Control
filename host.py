@@ -1,11 +1,15 @@
 '''Host computer, which receives/sends
 commands to the server'''
-import zmq
-import pandas as pd
+
 from datetime import datetime
 import queue
 import threading
 from enum import IntEnum
+
+import zmq
+import pandas as pd
+
+__author__ = "Aidan Cantu"
 
 # ZMQ setup
 context = zmq.Context()
@@ -37,20 +41,20 @@ class Status(IntEnum):
 # connection and determine when to send messages)
 SERVER_STATUS = 0
 
-# Set if the server status changed
+# Set if the server status changed recently
 STATUS_CHANGE = threading.Event()
 STATUS_CHANGE.clear()
 
 def sender():
-    '''Immediately sends any info in the
-    SEND_INFO queue over the socket'''
+    '''Thread which immediately sends any info in the
+    SEND_INFO queue to the server over the socket'''
     global SEND_INFO
     while(True):
         send_socket.send_string(SEND_INFO.get())
 
 def receiver():
-    '''Puts any received info from the socket
-    in the RECEIVED_INFO queue'''
+    '''Thread which processes all information received 
+    from the server'''
     global RECEIVED_LOGS, RECEIVED_MESSAGES, SERVER_STATUS
     while(True):
         message = receive_socket.recv()
@@ -59,7 +63,8 @@ def receiver():
         if message[:a] == "log":
             RECEIVED_LOGS.put(message[a+1:])
         elif message[:a] == "msg":
-            RECEIVED_MESSAGES.put(message[a+1:])
+            '''RECEIVED_MESSAGES.put(message[a+1:])'''
+            print('\n' + message[a+1:])
         elif message[:a] == "sta":
             a = int(message[a+1:])
             if SERVER_STATUS != a:
@@ -76,7 +81,7 @@ def logger():
             file.close()
 
 def req_status():
-    '''Manually get the current status of the server'''
+    '''Manually update the current status of the server'''
     global SEND_INFO
     message = "sta%"
     SEND_INFO.put(message)
@@ -92,21 +97,21 @@ def user_io():
         if SERVER_STATUS == Status.WAITING:
             print(". . .")
         elif SERVER_STATUS == Status.CMD_READY:
-            cmd = input("> > > ")
+            cmd = input("\n> > > ")
             cmd = "cmd%" + cmd
             SEND_INFO.put(cmd)
         elif SERVER_STATUS == Status.DMR_READY:
-            dmr = input("---> ")
+            dmr = input("\n---> ")
             dmr = "dmr%" + dmr
             SEND_INFO.put(dmr)
-
+'''
 def user_messages():
-    '''Thread which prints all received messages to the console'''
+    \'''Thread which prints all received messages to the console\'''
     global RECEIVED_MESSAGES
     while(True):
         message = RECEIVED_MESSAGES.get()
         print(message)
-
+'''
 
 send = threading.Thread(name='sender', target=sender)
 send.start()

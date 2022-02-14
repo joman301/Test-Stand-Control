@@ -1,10 +1,16 @@
-'''Executes user commands'''
+'''Contains most commands that the user
+can execute'''
 from enum import Enum
 import message as msg
 import time
+
 import board
 from adafruit_motor import stepper
 from adafruit_motorkit import MotorKit
+
+import sensors
+
+__author__ = "Aidan Cantu"
 
 LAST_COMMAND = []
 LOX_MOTOR_POS_DEG = 0
@@ -25,18 +31,19 @@ class Dev(Enum):
     KER_MOTOR = 2
 
 #Rotates specified motor by specified number of steps
-def rotate(motor, step_count):
+def rotate(motor, deg_count):
     global LOX_MOTOR_POS_DEG, KER_MOTOR_POS_DEG
 
-    if(abs(step_count) >= 50):
-        user_message = "Type \'yes\' to confirm %s steps on device %s" % (step_count, Dev(motor).name)
+    if(abs(deg_count) >= 90):
+        user_message = "Type \'yes\' to confirm %s degrees on device %s" % (step_count, Dev(motor).name)
         if msg.demand(user_message) != 'yes':
             msg.tell("Operation Cancelled")
             return 4
-    msg.tell(("Rotating %s Motor %s steps") % (Dev(motor).name, step_count))
-    msg.cmd_ready()
 
     deg_per_step = 1.8
+    step_count = int(deg_count / deg_per_step)
+    msg.tell(("Rotating %s Motor %s degrees") % (Dev(motor).name, deg_count))
+    msg.cmd_ready()
 
     if step_count > 0:
         dir = stepper.FORWARD
@@ -47,21 +54,25 @@ def rotate(motor, step_count):
     
     if motor == Dev.LOX_MOTOR:
         for i in range(step_count):
-            motors.stepper1.onestep(direction = dir, style=stepper.SINGLE)
-            LOX_MOTOR_POS_DEG += deg_per_step
-            time.sleep(0.01)
+            if msg.is_stopped():
+                msg.tell("Stopping LOX_MOTOR at position %s degrees" % LOX_MOTOR_POS_DEG)
+                break
+            else:
+                motors.stepper1.onestep(direction = dir, style=stepper.SINGLE)
+                LOX_MOTOR_POS_DEG += deg_per_step
+                time.sleep(0.01)
         motors.stepper1.release()
+        msg.tell("Successfully rotated LOX_MOTOR %s degrees" % LOX_MOTOR_POS_DEG)
 
     elif motor == Dev.KER_MOTOR:
         for i in range(step_count):
+            if msg.is_stopped():
+                msg.tell("Stopping KER_MOTOR at position %s degrees" % KER_MOTOR_POS_DEG)
             motors.stepper2.onestep(direction = dir, style=stepper.SINGLE)
             KER_MOTOR_POS_DEG += deg_per_step
             time.sleep(0.01)
         motors.stepper2.release()
-
-def rotate_deg(stepper, deg):
-    steps = deg//1.8
-    rotate(stepper, steps)
+        msg.tell("Successfully rotated KER_MOTOR %s degrees" % KER_MOTOR_POS_DEG)
 
 def lox_motor_pos():
     msg.tell("LOX Motor rotated %s degrees" % LOX_MOTOR_POS_DEG)
@@ -95,29 +106,30 @@ def ker_dec(n):
 
 def help():
     s = '''
-    lox_is: runs 10 steps forward on lox
-    lox_ds: runs 10 steps backward on lox
-    ker_is: runs 10 steps forward on kerosene
-    ker_ds: runs 10 steps backward on kerosene
+    lox_is: runs 10 degrees forward on lox
+    lox_ds: runs 10 degrees backward on lox
+    ker_is: runs 10 degrees forward on kerosene
+    ker_ds: runs 10 degrees backward on kerosene
 
-    lox_inc [n]: runs n steps forward on lox
-    lox_dec [n]: runs n steps backward on lox
-    ker_inc [n]: runs n steps forward on kerosene
-    ker_dec [n]: runs n steps backward on kerosene
+    lox_inc [n]: runs n degrees forward on lox
+    lox_dec [n]: runs n degrees backward on lox
+    ker_inc [n]: runs n degrees forward on kerosene
+    ker_dec [n]: runs n degrees backward on kerosene
 
     lox_motor_pos: return angular offset of lox motor
     ker_motor_pos: return angular offset of ker motor
 
-    log_data: start or stop logging sensor data
+    log [T/F]: start or stop logging sensor data
+    calibrate: sets y-intercept of all sensors to 0
+
     ping: test connection
     help: print help menu
-    quit: leave program
     rr: repeat last command
     '''
     msg.tell(s)
 
 # Starts or stops logging data from sensors
-def log_data(currently_logging):
+def log(currently_logging):
     if currently_logging.lower() == "true":
         msg.logging(True)
         msg.tell("Started Logging Data")
@@ -127,6 +139,10 @@ def log_data(currently_logging):
     else:
         msg.tell("Error: Invalid Option (Enter \"True\" or \"False\")")
 
+def calibrate():
+    '''calibrates all sensors by setting the y-intercept
+    of voltage-value conversion to 0'''
+    sensors.calibrate()
 
 # Repeats the previous command
 def rr():
@@ -153,7 +169,9 @@ commands = {
     "lox_motor_pos": [lox_motor_pos, 1],
     "ker_motor_pos": [ker_motor_pos, 1],
 
-    "log_data": [log_data, 2],
+    "log": [log, 2],
+    "calibrate": [calibrate, 1],
+
     "ping": [ping, 1],
     "help": [help, 1],
     "quit": [quit, 1],
