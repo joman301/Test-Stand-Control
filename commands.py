@@ -35,7 +35,7 @@ def rotate(motor, deg_count):
     global LOX_MOTOR_POS_DEG, KER_MOTOR_POS_DEG
 
     if(abs(deg_count) >= 90):
-        user_message = "Type \'yes\' to confirm %s degrees on device %s" % (step_count, Dev(motor).name)
+        user_message = "Type \'yes\' to confirm %s degrees on device %s" % (deg_count, Dev(motor).name)
         if msg.demand(user_message) != 'yes':
             msg.tell("Operation Cancelled")
             return 4

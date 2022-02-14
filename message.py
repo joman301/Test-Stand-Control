@@ -164,4 +164,4 @@ def is_stopped():
 
 def resume():
     global STOPPED
-    STOPPED = True
+    STOPPED = False

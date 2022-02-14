@@ -13,7 +13,7 @@ def execute():
     while(True):
         user_command = msg.get_cmd()
         user_command = cmd.parse(user_command)
-        if user_command[1].lower() == "stop":
+        if user_command[0].lower() == "stop":
             msg.stop()
             for x in threading.enumerate():
                 if x.getName()=="command":
