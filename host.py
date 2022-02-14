@@ -45,6 +45,15 @@ SERVER_STATUS = 0
 STATUS_CHANGE = threading.Event()
 STATUS_CHANGE.clear()
 
+'''Message types:
+    Sent:
+        cmd - Command with arguments, which can be executed on server
+        dmr - Replies to demands from the server
+        sta - Requests the server status
+    Received:
+        log - CSV data from the server
+        sta - The current server status'''
+
 def sender():
     '''Thread which immediately sends any info in the
     SEND_INFO queue to the server over the socket'''
@@ -80,12 +89,6 @@ def logger():
             file.write(data)
             file.close()
 
-def req_status():
-    '''Manually update the current status of the server'''
-    global SEND_INFO
-    message = "sta%"
-    SEND_INFO.put(message)
-
 def user_io():
     '''Thread which controls user io, by getting input
     and printing output'''
@@ -104,14 +107,12 @@ def user_io():
             dmr = input("\n---> ")
             dmr = "dmr%" + dmr
             SEND_INFO.put(dmr)
-'''
-def user_messages():
-    \'''Thread which prints all received messages to the console\'''
-    global RECEIVED_MESSAGES
-    while(True):
-        message = RECEIVED_MESSAGES.get()
-        print(message)
-'''
+
+def req_status():
+    '''Manually update the current status of the server'''
+    global SEND_INFO
+    message = "sta%"
+    SEND_INFO.put(message)
 
 send = threading.Thread(name='sender', target=sender)
 send.start()
@@ -129,15 +130,3 @@ print("Sucessfully Connected")
 
 user_inout = threading.Thread(name='userio', target=user_io)
 user_inout.start()
-
-#user_message = threading.Thread(name='user_messages', target=user_messages)
-#user_message.start()
-
-'''Message types:
-    Sent:
-        cmd - Command with arguments, which can be executed on server
-        dmr - Replies to demands from the server
-        sta - Requests the server status
-    Received:
-        log - CSV data from the server
-        sta - The current server status'''

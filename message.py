@@ -23,9 +23,6 @@ receive_socket.bind("tcp://*:5556")
 # Queue of all data that will later be sent to the host
 SEND_INFO = queue.Queue()
 
-# Queue of all demands from the host
-RECEIVED_DEMANDS = queue.Queue(1)
-
 # Queue of all responses to demands from the server
 DEMAND_REPLIES = queue.Queue(1)
 
@@ -107,15 +104,6 @@ def get_cmd():
     set_status(Status.WAITING)
 
     return a
-
-def get_dmd():
-    '''Received demands from the host, and replies with a string'''
-    global RECEIVED_DEMANDS
-    demand = RECEIVED_DEMANDS.get()
-    message = "dmr%"
-    if demand == "status":
-        message = str(SERVER_STATUS)
-    SEND_INFO.put(message)
         
 def demand(message):
     '''Waits until user input is allowed, then sets server status
@@ -126,6 +114,9 @@ def demand(message):
     USER_IO_AVAILABLE.wait()
 
     tell(message)
+
+    while DEMAND_REPLIES.empty() == False:
+        DEMAND_REPLIES.get()
 
     USER_IO_AVAILABLE.clear()
 
