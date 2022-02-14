@@ -130,8 +130,8 @@ print("Sucessfully Connected")
 user_inout = threading.Thread(name='userio', target=user_io)
 user_inout.start()
 
-user_message = threading.Thread(name='user_messages', target=user_messages)
-user_message.start()
+#user_message = threading.Thread(name='user_messages', target=user_messages)
+#user_message.start()
 
 '''Message types:
     Sent:
