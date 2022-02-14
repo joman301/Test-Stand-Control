@@ -142,7 +142,7 @@ def log(currently_logging):
 def calibrate():
     '''calibrates all sensors by setting the y-intercept
     of voltage-value conversion to 0'''
-    sensors.calibrate()
+    sensors.calibrate_all()
 
 # Repeats the previous command
 def rr():

@@ -68,3 +68,7 @@ def calibrate(data):
     convert = conv_linear.get(data)
     conv_linear[data] = [convert[0] - current_value, convert[1]]           
 
+def calibrate_all():
+    '''calibrate all sensors'''
+    for item in Data:
+        calibrate(item)
