@@ -3,10 +3,15 @@ various sensors on the assembly'''
 
 from datetime import datetime
 from enum import Enum
+import threading
 
 from ADCDifferentialPi import ADCDifferentialPi
 
 __author__ = "Aidan Cantu"
+
+# Global variable indicating if reading sensor data
+SENSORS_AVAILABLE = threading.Event()
+SENSORS_AVAILABLE.set()
 
 # A/D Differential Sensor
 ADC_ADDR_ONE = 0x68
@@ -25,8 +30,8 @@ class Data(Enum):
 #Calibration for a + bx voltage/data translation
 #First value is y-int, second is slope
 conv_linear = {
-    Data.LOX_PSI: [0.0006875, 100700],
-    Data.KER_PSI: [0.0006875, 100700],
+    Data.LOX_PSI: [0.0006875, 10070],
+    Data.KER_PSI: [0.0006875, 10070],
     Data.PRES_PSI: [0.0006875, 100700]
 }
 
@@ -54,12 +59,19 @@ def read_all():
 
 def read_voltage(data):
     '''Returns the raw voltage value from the sensor'''
+    SENSORS_AVAILABLE.wait()
+    SENSORS_AVAILABLE.clear()
     if data == Data.LOX_PSI:
-        return adc.read_voltage(2)
+        a =  adc.read_voltage(2)
     elif data == Data.KER_PSI:
-        return adc.read_voltage(3)
+        a = adc.read_voltage(3)
     elif data ==Data.PRES_PSI:
-        return adc.read_voltage(4)
+        a = adc.read_voltage(4)
+    else:
+        a = 0
+    SENSORS_AVAILABLE.set()
+    return a
+    
 
 def calibrate(data):
     '''sets current value from sensor as 0'''

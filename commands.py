@@ -20,11 +20,13 @@ KER_MOTOR_POS_DEG = 0
 # stepper2 --> M3, M4 terminals
 
 # 200 steps --> 360 deg; 1.8 deg per step
+# Gear ratio of 100:1
 
 # stepper.FORWARD = clockwise, increase presssure
 # stepper.BACKWARD = counterclockwise, decrease pressure
 
 motors = MotorKit(i2c=board.I2C())
+GEAR_RATIO = 100
 
 class Dev(Enum):
     LOX_MOTOR = 1
@@ -33,6 +35,8 @@ class Dev(Enum):
 #Rotates specified motor by specified number of steps
 def rotate(motor, deg_count):
     global LOX_MOTOR_POS_DEG, KER_MOTOR_POS_DEG
+
+    deg_count = deg_count * GEAR_RATIO
 
     if(abs(deg_count) >= 90):
         user_message = "Type \'yes\' to confirm %s degrees on device %s" % (deg_count, Dev(motor).name)
